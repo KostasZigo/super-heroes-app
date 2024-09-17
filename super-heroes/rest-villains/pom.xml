@@ -13,7 +13,7 @@
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
     <quarkus.platform.version>3.6.0</quarkus.platform.version>
-    <skipITs>true</skipITs>
+    <skipITs>false</skipITs>
     <surefire-plugin.version>3.1.2</surefire-plugin.version>
   </properties>
   <dependencyManagement>
@@ -27,8 +27,10 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-    
+
   <dependencies>
+
+<!--    COMPILE -->
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
@@ -42,6 +44,19 @@
       <artifactId>quarkus-resteasy-reactive</artifactId>
     </dependency>
 
+<!--    JDBC-ORM-->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-hibernate-orm-panache</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-hibernate-validator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-postgresql</artifactId>
+    </dependency>
 
 <!--     TEST DEPENDENCIES-->
     <dependency>
@@ -54,6 +69,7 @@
       <artifactId>rest-assured</artifactId>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 
   <build>
