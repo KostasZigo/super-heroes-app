@@ -1,7 +1,7 @@
 package io.quarkus.workshop.superheroes.villain;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.workshop.superheroes.villain.entities.Villain;
+import io.quarkus.workshop.superheroes.api.model.Villain;
 import io.restassured.common.mapper.TypeRef;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.MethodOrderer;
@@ -82,7 +82,7 @@ public class VillainResourceTest {
       .extract()
       .body()
       .as(Villain.class);
-    assertEquals(firstVillain.name, FIRST_VILLAIN_NAME);
+    assertEquals(firstVillain.getName(), FIRST_VILLAIN_NAME);
   }
 
   @Test
@@ -97,18 +97,18 @@ public class VillainResourceTest {
       .body()
       .as(Villain.class);
     assertNotNull(randomVillain);
-    assertNotNull(randomVillain.name);
-    assertNotNull(randomVillain.level);
+    assertNotNull(randomVillain.getName());
+    assertNotNull(randomVillain.getLevel());
   }
 
   @Test
   void shouldNotAddInvalidItem() {
     Villain villain = new Villain();
-    villain.name = null;
-    villain.otherName = DEFAULT_OTHER_NAME;
-    villain.picture = DEFAULT_PICTURE;
-    villain.powers = DEFAULT_POWERS;
-    villain.level = 0;
+    villain.setName(null);
+    villain.setOtherName(DEFAULT_OTHER_NAME);
+    villain.setPicture(DEFAULT_PICTURE);
+    villain.setPowers(DEFAULT_POWERS);
+    villain.setLevel(0);
 
     given()
       .body(villain)
@@ -123,13 +123,16 @@ public class VillainResourceTest {
   @Test
   @Order(1)
   void shouldGetInitialItems() {
-    List<Villain> villains = get("/api/villains")
-      .then()
-      .statusCode(OK.getStatusCode())
-      .contentType(APPLICATION_JSON)
-      .extract()
-      .body()
-      .as(getVillainTypeRef());
+    List<Villain> villains =
+      given()
+        .when()
+        .get("/api/villains")
+        .then()
+        .statusCode(OK.getStatusCode())
+        .contentType(APPLICATION_JSON)
+        .extract()
+        .body()
+        .as(getVillainTypeRef());
     assertEquals(NB_VILLAINS, villains.size());
   }
 
@@ -137,11 +140,11 @@ public class VillainResourceTest {
   @Order(2)
   void shouldAddAnItem() {
     Villain villain = new Villain();
-    villain.name = DEFAULT_NAME;
-    villain.otherName = DEFAULT_OTHER_NAME;
-    villain.picture = DEFAULT_PICTURE;
-    villain.powers = DEFAULT_POWERS;
-    villain.level = DEFAULT_LEVEL;
+    villain.setName(DEFAULT_NAME);
+    villain.setOtherName(DEFAULT_OTHER_NAME);
+    villain.setPicture(DEFAULT_PICTURE);
+    villain.setPowers(DEFAULT_POWERS);
+    villain.setLevel(DEFAULT_LEVEL);
 
     String location = given()
       .body(villain)
@@ -187,12 +190,12 @@ public class VillainResourceTest {
   @Order(3)
   void testUpdatingAnItem() {
     Villain villain = new Villain();
-    villain.id = Long.valueOf(villainId);
-    villain.name = UPDATED_NAME;
-    villain.otherName = UPDATED_OTHER_NAME;
-    villain.picture = UPDATED_PICTURE;
-    villain.powers = UPDATED_POWERS;
-    villain.level = UPDATED_LEVEL;
+    villain.setId(Long.valueOf(villainId));
+    villain.setName(UPDATED_NAME);
+    villain.setOtherName(UPDATED_OTHER_NAME);
+    villain.setPicture(UPDATED_PICTURE);
+    villain.setPowers(UPDATED_POWERS);
+    villain.setLevel(UPDATED_LEVEL);
 
     given()
       .body(villain)
@@ -223,12 +226,12 @@ public class VillainResourceTest {
   @Test
   void testUpdatingAnUnknownItem() {
     Villain villain = new Villain();
-    villain.id = new Random().nextLong();
-    villain.name = UPDATED_NAME;
-    villain.otherName = UPDATED_OTHER_NAME;
-    villain.picture = UPDATED_PICTURE;
-    villain.powers = UPDATED_POWERS;
-    villain.level = UPDATED_LEVEL;
+    villain.setId(new Random().nextLong());
+    villain.setName(UPDATED_NAME);
+    villain.setOtherName(UPDATED_OTHER_NAME);
+    villain.setPicture(UPDATED_PICTURE);
+    villain.setPowers(UPDATED_POWERS);
+    villain.setLevel(UPDATED_LEVEL);
 
     given()
       .body(villain)
@@ -243,12 +246,12 @@ public class VillainResourceTest {
   @Test
   void testUpdatingAnInvalidItem() {
     Villain villain = new Villain();
-    villain.id = Long.valueOf(villainId);
-    villain.name = UPDATED_NAME;
-    villain.otherName = UPDATED_OTHER_NAME;
-    villain.picture = UPDATED_PICTURE;
-    villain.powers = UPDATED_POWERS;
-    villain.level = 0; // 0 is invalid value
+    villain.setId(Long.valueOf(villainId));
+    villain.setName(UPDATED_NAME);
+    villain.setOtherName(UPDATED_OTHER_NAME);
+    villain.setPicture(UPDATED_PICTURE);
+    villain.setPowers(UPDATED_POWERS);
+    villain.setLevel(0); // 0 is invalid value
 
     given()
       .body(villain)

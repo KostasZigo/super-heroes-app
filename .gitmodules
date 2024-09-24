@@ -1,0 +1,3 @@
+[submodule "super-heroes/rest-villains/src/main/openapi"]
+	path = super-heroes/rest-villains/src/main/openapi
+	url = https://github.com/KostasZigo/villain-openapi.git
