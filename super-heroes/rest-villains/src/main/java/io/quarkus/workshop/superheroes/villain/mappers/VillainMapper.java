@@ -1,6 +1,7 @@
 package io.quarkus.workshop.superheroes.villain.mappers;
 
-import io.quarkus.workshop.superheroes.api.model.Villain;
+
+import io.quarkus.workshop.superheroes.villain.api.model.Villain;
 import io.quarkus.workshop.superheroes.villain.entities.VillainEntity;
 import org.mapstruct.Mapper;
 

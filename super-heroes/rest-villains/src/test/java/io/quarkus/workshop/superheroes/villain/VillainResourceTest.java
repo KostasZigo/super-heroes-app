@@ -1,7 +1,7 @@
 package io.quarkus.workshop.superheroes.villain;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.workshop.superheroes.api.model.Villain;
+import io.quarkus.workshop.superheroes.villain.api.model.Villain;
 import io.restassured.common.mapper.TypeRef;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.MethodOrderer;

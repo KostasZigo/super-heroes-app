@@ -2,7 +2,7 @@ package io.quarkus.workshop.superheroes.villain;
 
 import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.workshop.superheroes.api.model.Villain;
+import io.quarkus.workshop.superheroes.villain.api.model.Villain;
 import io.quarkus.workshop.superheroes.villain.services.VillainService;
 import org.junit.jupiter.api.Test;
 

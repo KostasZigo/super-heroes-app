@@ -1,6 +1,7 @@
 package io.quarkus.workshop.superheroes.villain.services;
 
-import io.quarkus.workshop.superheroes.api.model.Villain;
+
+import io.quarkus.workshop.superheroes.villain.api.model.Villain;
 import io.quarkus.workshop.superheroes.villain.entities.VillainEntity;
 import io.quarkus.workshop.superheroes.villain.mappers.VillainMapper;
 import jakarta.enterprise.context.ApplicationScoped;
