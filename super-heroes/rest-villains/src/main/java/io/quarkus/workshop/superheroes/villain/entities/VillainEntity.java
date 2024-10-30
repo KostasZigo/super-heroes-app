@@ -12,7 +12,7 @@ import jakarta.validation.constraints.Size;
  * Extends PanacheEntity to leverage Panache's active record pattern.
  */
 @Entity
-public class Villain extends PanacheEntity {
+public class VillainEntity extends PanacheEntity {
 
 
   //The name of the villain.

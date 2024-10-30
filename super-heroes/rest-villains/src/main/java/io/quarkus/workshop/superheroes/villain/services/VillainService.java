@@ -1,7 +1,10 @@
 package io.quarkus.workshop.superheroes.villain.services;
 
-import io.quarkus.workshop.superheroes.villain.entities.Villain;
+import io.quarkus.workshop.superheroes.api.model.Villain;
+import io.quarkus.workshop.superheroes.villain.entities.VillainEntity;
+import io.quarkus.workshop.superheroes.villain.mappers.VillainMapper;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -18,17 +21,20 @@ import static jakarta.transaction.Transactional.TxType.SUPPORTS;
 @Transactional
 public class VillainService {
 
+  @Inject
+  VillainMapper villainMapper;
+
   @ConfigProperty(name = "level.multiplier", defaultValue = "1.0")
   private double levelMultiplier;
 
   @Transactional(SUPPORTS)
   public List<Villain> findAllVillains() {
-    return Villain.listAll();
+    return villainMapper.toVillainDTOs(VillainEntity.listAll());
   }
 
   @Transactional(SUPPORTS)
   public Villain findVillainById(Long id) {
-    return Villain.findById(id);
+    return villainMapper.toVillainDTO(VillainEntity.findById(id));
   }
 
   /**
@@ -39,19 +45,20 @@ public class VillainService {
    */
   @Transactional(SUPPORTS)
   public Villain findRandomVillain() {
-    long countVillains = Villain.count();
+    long countVillains = VillainEntity.count();
     if (countVillains == 0) {
       throw new IllegalArgumentException("No villains found in DB.");
     }
     Random random = new Random();
     int randomVillain = random.nextInt((int) countVillains);
-    return Villain.findAll().page(randomVillain, 1).firstResult();
+    return villainMapper.toVillainDTO(VillainEntity.findAll().page(randomVillain, 1).firstResult());
   }
 
   public Villain persistVillain(@Valid Villain villain) {
-    villain.level = (int) Math.round(villain.level * levelMultiplier);
-    villain.persist();
-    return villain;
+    VillainEntity villainEntity = villainMapper.toVillainEntity(villain);
+    villainEntity.level = (int) Math.round(villainEntity.level * levelMultiplier);
+    villainEntity.persist();
+    return villainMapper.toVillainDTO(villainEntity);
   }
 
   /**
@@ -61,11 +68,11 @@ public class VillainService {
    * @throws IllegalArgumentException if the villain with the given ID does not exist.
    */
   public Villain updateVillain(@Valid Villain villain) {
-    Villain villainEntity = Villain.findById(villain.id);
+    VillainEntity villainEntity = VillainEntity.findById(villain.getId());
     if (villainEntity == null) {
-      throw new IllegalArgumentException("Villain with id " + villain.id + " does not exist.");
+      throw new IllegalArgumentException("Villain with id " + villain.getId() + " does not exist.");
     }
-    return updateVillainFields(villainEntity, villain);
+    return villainMapper.toVillainDTO(updateVillainFields(villainEntity, villain));
   }
 
   /**
@@ -73,7 +80,7 @@ public class VillainService {
    * @throws IllegalArgumentException if the villain with the given ID does not exist.
    */
   public void deleteVillain(Long id) {
-    Villain villain = Villain.findById(id);
+    VillainEntity villain = VillainEntity.findById(id);
     if (villain == null) {
       throw new IllegalArgumentException("Villain with id " + id + " does not exist.");
     }
@@ -84,12 +91,12 @@ public class VillainService {
     Helper methods
    */
 
-  private static Villain updateVillainFields(Villain villainEntity, Villain villain) {
-    villainEntity.name = villain.name;
-    villainEntity.otherName = villain.otherName;
-    villainEntity.level = villain.level;
-    villainEntity.picture = villain.picture;
-    villainEntity.powers = villain.powers;
+  private static VillainEntity updateVillainFields(VillainEntity villainEntity, Villain villain) {
+    villainEntity.name = villain.getName();
+    villainEntity.otherName = villain.getOtherName();
+    villainEntity.level = villain.getLevel();
+    villainEntity.picture = villain.getPicture();
+    villainEntity.powers = villain.getPowers();
     return villainEntity;
   }
 }

@@ -2,9 +2,11 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>io.quarkus.workshop.super-heroes</groupId>
   <artifactId>rest-villains</artifactId>
   <version>1.0.0-SNAPSHOT</version>
+
   <properties>
     <compiler-plugin.version>3.11.0</compiler-plugin.version>
     <maven.compiler.release>17</maven.compiler.release>
@@ -15,7 +17,10 @@
     <quarkus.platform.version>3.6.0</quarkus.platform.version>
     <skipITs>true</skipITs>
     <surefire-plugin.version>3.1.2</surefire-plugin.version>
+    <mapstruct.version>1.5.5.Final</mapstruct.version>
+    <swagger-annotations.version>1.6.5</swagger-annotations.version>
   </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -47,8 +52,28 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-openapi</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-annotations</artifactId>
+      <version>${swagger-annotations.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct</artifactId>
+      <version>${mapstruct.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct-processor</artifactId>
+      <version>${mapstruct.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
-<!--    JDBC-ORM-->
+    <!--    JDBC-ORM-->
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-hibernate-orm-panache</artifactId>
@@ -79,6 +104,34 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <version>7.2.0</version>
+        <configuration>
+          <!-- https://github.com/OpenAPITools/openapi-generator/blob/master/docs/generators/jaxrs-spec.md -->
+          <generatorName>jaxrs-spec</generatorName>
+          <inputSpec>${project.basedir}/src/main/openapi/reference/VillainAPI.yaml</inputSpec>
+          <modelPackage>io.quarkus.workshop.superheroes.api.model</modelPackage>
+          <configOptions>
+            <sourceFolder>src</sourceFolder>
+            <apiPackage>io.quarkus.workshop.superheroes.api</apiPackage>
+            <useTags>true</useTags>
+            <interfaceOnly>true</interfaceOnly>
+            <useJakartaEe>true</useJakartaEe>
+            <dateLibrary>java8-localdatetime</dateLibrary>
+            <returnResponse>true</returnResponse>
+          </configOptions>
+        </configuration>
+        <executions>
+          <execution>
+            <id>generate-api</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>${quarkus.platform.group-id}</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>
         <version>${quarkus.platform.version}</version>
@@ -108,7 +161,7 @@
         <configuration>
           <systemPropertyVariables>
             <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-            <maven.home>${maven.home}</maven.home>
+<!--            <maven.home>${maven.home}</maven.home>-->
           </systemPropertyVariables>
         </configuration>
       </plugin>
@@ -127,12 +180,13 @@
           <systemPropertyVariables>
             <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
             <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-            <maven.home>${maven.home}</maven.home>
+<!--            <maven.home>${maven.home}</maven.home>-->
           </systemPropertyVariables>
         </configuration>
       </plugin>
     </plugins>
   </build>
+
   <profiles>
     <profile>
       <id>native</id>
@@ -147,4 +201,5 @@
       </properties>
     </profile>
   </profiles>
+
 </project>
