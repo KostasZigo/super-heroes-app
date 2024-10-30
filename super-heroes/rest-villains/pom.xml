@@ -111,10 +111,10 @@
           <!-- https://github.com/OpenAPITools/openapi-generator/blob/master/docs/generators/jaxrs-spec.md -->
           <generatorName>jaxrs-spec</generatorName>
           <inputSpec>${project.basedir}/src/main/openapi/reference/VillainAPI.yaml</inputSpec>
-          <modelPackage>io.quarkus.workshop.superheroes.api.model</modelPackage>
+          <modelPackage>io.quarkus.workshop.superheroes.villain.api.model</modelPackage>
           <configOptions>
             <sourceFolder>src</sourceFolder>
-            <apiPackage>io.quarkus.workshop.superheroes.api</apiPackage>
+            <apiPackage>io.quarkus.workshop.superheroes.villain.api</apiPackage>
             <useTags>true</useTags>
             <interfaceOnly>true</interfaceOnly>
             <useJakartaEe>true</useJakartaEe>

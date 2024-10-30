@@ -15,6 +15,7 @@
         <quarkus.platform.version>3.15.0</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.3.1</surefire-plugin.version>
+      <swagger-annotations.version>1.6.5</swagger-annotations.version>
     </properties>
 
     <dependencyManagement>
@@ -30,6 +31,9 @@
     </dependencyManagement>
 
     <dependencies>
+
+<!--COMPILE dependencies-->
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-jackson</artifactId>
@@ -58,6 +62,18 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest</artifactId>
         </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>io.swagger</groupId>
+        <artifactId>swagger-annotations</artifactId>
+        <version>${swagger-annotations.version}</version>
+      </dependency>
+
+<!--      TEST dependencies-->
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
@@ -72,6 +88,36 @@
 
     <build>
         <plugins>
+            <plugin>
+              <groupId>org.openapitools</groupId>
+              <artifactId>openapi-generator-maven-plugin</artifactId>
+              <version>7.2.0</version>
+              <configuration>
+                <!-- https://github.com/OpenAPITools/openapi-generator/blob/master/docs/generators/jaxrs-spec.md -->
+                <generatorName>jaxrs-resteasy-reactive</generatorName>
+                <inputSpec>${project.basedir}/src/main/resources/HeroAPI.yaml</inputSpec>
+                <modelPackage>io.quarkus.workshop.superheroes.hero.api.model</modelPackage>
+                <configOptions>
+                  <sourceFolder>src</sourceFolder>
+                  <apiPackage>io.quarkus.workshop.superheroes.hero.api</apiPackage>
+                  <useTags>true</useTags>
+                  <interfaceOnly>true</interfaceOnly>
+                  <useJakartaEe>true</useJakartaEe>
+                  <dateLibrary>java8-localdatetime</dateLibrary>
+                  <additionalProperties>
+                    <reactive>true</reactive> <!-- Enable reactive support (Uni) -->
+                  </additionalProperties>
+                </configOptions>
+              </configuration>
+              <executions>
+                <execution>
+                  <id>generate-api</id>
+                  <goals>
+                    <goal>generate</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
             <plugin>
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
@@ -101,7 +147,7 @@
                 <configuration>
                     <systemPropertyVariables>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                        <maven.home>${maven.home}</maven.home>
+<!--                        <maven.home>${maven.home}</maven.home>-->
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -120,7 +166,7 @@
                     <systemPropertyVariables>
                         <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                        <maven.home>${maven.home}</maven.home>
+<!--                        <maven.home>${maven.home}</maven.home>-->
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
