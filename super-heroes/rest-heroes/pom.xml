@@ -91,22 +91,21 @@
             <plugin>
               <groupId>org.openapitools</groupId>
               <artifactId>openapi-generator-maven-plugin</artifactId>
-              <version>7.2.0</version>
+              <version>7.9.0</version>
               <configuration>
                 <!-- https://github.com/OpenAPITools/openapi-generator/blob/master/docs/generators/jaxrs-spec.md -->
-                <generatorName>jaxrs-resteasy-reactive</generatorName>
+                <generatorName>jaxrs-spec</generatorName>
                 <inputSpec>${project.basedir}/src/main/resources/HeroAPI.yaml</inputSpec>
                 <modelPackage>io.quarkus.workshop.superheroes.hero.api.model</modelPackage>
                 <configOptions>
-                  <sourceFolder>src</sourceFolder>
+                  <supportAsync>true</supportAsync>
+                  <useMutiny>true</useMutiny>
+                  <library>quarkus</library>
                   <apiPackage>io.quarkus.workshop.superheroes.hero.api</apiPackage>
                   <useTags>true</useTags>
                   <interfaceOnly>true</interfaceOnly>
-                  <useJakartaEe>true</useJakartaEe>
                   <dateLibrary>java8-localdatetime</dateLibrary>
-                  <additionalProperties>
-                    <reactive>true</reactive> <!-- Enable reactive support (Uni) -->
-                  </additionalProperties>
+                  <useJakartaEe>true</useJakartaEe>
                 </configOptions>
               </configuration>
               <executions>
