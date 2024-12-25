@@ -1,130 +1,91 @@
 package io.quarkus.workshop.superheroes.hero;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
-import io.quarkus.workshop.superheroes.hero.entities.HeroEntity;
+import io.quarkus.workshop.superheroes.hero.api.HeroesApi;
+import io.quarkus.workshop.superheroes.hero.api.model.Hero;
+import io.quarkus.workshop.superheroes.hero.services.HeroService;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.NoContentException;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestPath;
-import org.jboss.resteasy.reactive.RestResponse;
+import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.util.List;
-
-import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
-
+// Resource class for the Heroes API.
+// Heroes API will not be using git submodule as the Villain one. But rather contain the OpenAPI specifications
+// directly in its code.
 @Path("/api/heroes")
 @Tag(name = "heroes")
-public class HeroResource {
+public class HeroResource implements HeroesApi {
+
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(HeroResource.class);
 
   @Inject
   private Logger logger;
 
-  @Operation(summary = "Returns a random hero")
-  @GET
-  @Path("/random")
-  @APIResponse(responseCode = "200", content = @Content(mediaType = APPLICATION_JSON, schema = @Schema(implementation = HeroEntity.class, required = true)))
-  public Uni<RestResponse<HeroEntity>> getRandomHero() {
-    return HeroEntity.findRandom()
-      .onItem().ifNotNull().transform(h -> {
-        this.logger.debugf("Found random hero: %s", h);
-        return RestResponse.ok(h);
-      })
-      .onItem().ifNull().continueWith(() -> {
-        this.logger.debug("No random hero found");
-        return RestResponse.notFound();
-      });
+  @Context
+  UriInfo uriInfo;
+
+  @Inject
+  HeroService heroService;
+
+  public Uni<Response> getRandomHero() {
+    logger.info("Retrieving random hero...");
+    return heroService.retrieveRandomHero().map(hero -> Response.ok(hero).build())
+      .onFailure(NoContentException.class)
+      .recoverWithItem(() -> Response.noContent().build());
   }
 
-  @Operation(summary = "Returns all the heroes from the database")
-  @GET
-  @APIResponse(responseCode = "200", content = @Content(mediaType = APPLICATION_JSON, schema = @Schema(implementation = HeroEntity.class, type = SchemaType.ARRAY)))
-  public Uni<List<HeroEntity>> getAllHeroes() {
-    return HeroEntity.listAll();
+  public Uni<Response> getAllHeroes() {
+    logger.info("Retrieving all heroes");
+    return heroService.retrieveAllHeroes().map(heroList -> Response.ok(heroList).build());
   }
 
-  @Operation(summary = "Returns a hero for a given identifier")
-  @GET
-  @Path("/{id}")
-  @APIResponse(responseCode = "200", content = @Content(mediaType = APPLICATION_JSON, schema = @Schema(implementation = HeroEntity.class)))
-  @APIResponse(responseCode = "204", description = "The hero is not found for a given identifier")
-  public Uni<RestResponse<HeroEntity>> getHero(@RestPath Long id) {
-    return HeroEntity.<HeroEntity>findById(id)
-      .map(hero -> {
-        if (hero != null) {
-          return RestResponse.ok(hero);
-        }
-        logger.debugf("No Hero found with id %d", id);
-        return RestResponse.noContent();
-      });
+  public Uni<Response> getHero(@RestPath Long id) {
+    logger.infof("Retrieving hero by id %d", id);
+    return heroService.retrieveHeroById(id).map(hero -> Response.ok(hero).build())
+      .onFailure(NoContentException.class)
+      .recoverWithItem(Response.noContent().build());
   }
 
-  @Operation(summary = "Creates a valid hero")
-  @POST
-  @APIResponse(responseCode = "201", description = "The URI of the created hero", content = @Content(mediaType = APPLICATION_JSON, schema = @Schema(implementation = URI.class)))
   @WithTransaction
-  public Uni<RestResponse<URI>> createHero(@Valid HeroEntity hero, @Context UriInfo uriInfo) {
-    return hero.<HeroEntity>persist()
+  public Uni<Response> createHero(@Valid Hero hero) {
+    logger.info("Creating hero..");
+    return heroService.createHero(hero)
       .map(h -> {
-        UriBuilder builder = uriInfo.getAbsolutePathBuilder().path(Long.toString(h.id));
+        UriBuilder builder = uriInfo.getAbsolutePathBuilder().path(Long.toString(h.getId()));
         logger.debug("New Hero created with URI " + builder.build().toString());
-        return RestResponse.created(builder.build());
+        return Response.created(builder.build()).build();
       });
   }
 
-  @Operation(summary = "Updates an exiting hero")
-  @PUT
-  @APIResponse(responseCode = "200", description = "The updated hero", content = @Content(mediaType = APPLICATION_JSON, schema = @Schema(implementation = HeroEntity.class)))
   @WithTransaction
-  public Uni<HeroEntity> updateHero(@Valid HeroEntity hero) {
-    return HeroEntity.<HeroEntity>findById(hero.id)
-      .map(retrieved -> {
-        retrieved.name = hero.name;
-        retrieved.otherName = hero.otherName;
-        retrieved.level = hero.level;
-        retrieved.picture = hero.picture;
-        retrieved.powers = hero.powers;
-        return retrieved;
-      })
-      .map(h -> {
-        logger.debugf("Hero updated with new valued %s", h);
-        return h;
-      });
-
+  public Uni<Response> updateHero(@Valid Hero hero) {
+    logger.info("Updating hero...");
+    return heroService.updateHero(hero).map(h -> Response.ok(h).build());
   }
 
-  @Operation(summary = "Deletes an exiting hero")
-  @DELETE
-  @Path("/{id}")
-  @APIResponse(responseCode = "204")
   @WithTransaction
-  public Uni<RestResponse<Void>> deleteHero(@RestPath Long id) {
-    return HeroEntity.deleteById(id)
+  public Uni<Response> deleteHero(@RestPath Long id) {
+    return heroService.deleteHeroById(id)
       .invoke(() -> logger.debugf("Hero deleted with %d", id))
-      .replaceWith(RestResponse.noContent());
+      .replaceWith(Response.noContent().build());
   }
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("/hello")
-  public String hello() {
-    return "Hello Hero Resource";
+  public Uni<Response> hello() {
+    return Uni.createFrom().item(Response.ok("Hello Hero Resource").build());
   }
 }

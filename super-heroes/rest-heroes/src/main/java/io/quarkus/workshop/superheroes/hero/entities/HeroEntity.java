@@ -1,17 +1,19 @@
 package io.quarkus.workshop.superheroes.hero.entities;
 
-import io.quarkus.hibernate.reactive.panache.PanacheEntity;
-import io.smallrye.mutiny.Uni;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import java.util.Random;
-
 @Entity
-public class HeroEntity extends PanacheEntity {
+public class HeroEntity {
+
+  @Id
+  @GeneratedValue
+  public Long id;
 
   @NotNull
   @Size(min = 3, max = 50)
@@ -37,14 +39,6 @@ public class HeroEntity extends PanacheEntity {
    */
   @Column(columnDefinition = "TEXT")
   public String powers;
-
-  public static Uni<HeroEntity> findRandom() {
-    Random random = new Random();
-    return count()
-      .map(count -> random.nextInt(count.intValue()))
-      .chain(randomHero -> findAll().page(randomHero, 1)
-        .firstResult());
-  }
 
   @Override
   public String toString() {

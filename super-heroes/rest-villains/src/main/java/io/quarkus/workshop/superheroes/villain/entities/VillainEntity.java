@@ -28,7 +28,7 @@ public class VillainEntity extends PanacheEntity {
 
 
   // A URL or path to an image representing the villain.
-    public String picture;
+  public String picture;
 
   /**
    * A description of the villain's powers.

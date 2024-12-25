@@ -15,7 +15,9 @@
         <quarkus.platform.version>3.15.0</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.3.1</surefire-plugin.version>
-      <swagger-annotations.version>1.6.5</swagger-annotations.version>
+        <swagger-annotations.version>1.6.5</swagger-annotations.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <lombok.version>1.18.30</lombok.version>
     </properties>
 
     <dependencyManagement>
@@ -62,14 +64,31 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest</artifactId>
         </dependency>
+        <dependency>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>io.swagger</groupId>
+          <artifactId>swagger-annotations</artifactId>
+          <version>${swagger-annotations.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.mapstruct</groupId>
+          <artifactId>mapstruct</artifactId>
+          <version>${mapstruct.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.mapstruct</groupId>
+          <artifactId>mapstruct-processor</artifactId>
+          <version>${mapstruct.version}</version>
+          <scope>provided</scope>
+        </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-      </dependency>
-      <dependency>
-        <groupId>io.swagger</groupId>
-        <artifactId>swagger-annotations</artifactId>
-        <version>${swagger-annotations.version}</version>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>${lombok.version}</version>
+        <scope>provided</scope>
       </dependency>
 
 <!--      TEST dependencies-->
@@ -95,7 +114,7 @@
               <configuration>
                 <!-- https://github.com/OpenAPITools/openapi-generator/blob/master/docs/generators/jaxrs-spec.md -->
                 <generatorName>jaxrs-spec</generatorName>
-                <inputSpec>${project.basedir}/src/main/resources/HeroAPI.yaml</inputSpec>
+                <inputSpec>${project.basedir}/src/main/openapi/HeroAPI.yaml</inputSpec>
                 <modelPackage>io.quarkus.workshop.superheroes.hero.api.model</modelPackage>
                 <configOptions>
                   <supportAsync>true</supportAsync>
@@ -106,6 +125,7 @@
                   <interfaceOnly>true</interfaceOnly>
                   <dateLibrary>java8-localdatetime</dateLibrary>
                   <useJakartaEe>true</useJakartaEe>
+                  <returnResponse>true</returnResponse>
                 </configOptions>
               </configuration>
               <executions>
@@ -114,6 +134,25 @@
                   <goals>
                     <goal>generate</goal>
                   </goals>
+                </execution>
+              </executions>
+            </plugin>
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>build-helper-maven-plugin</artifactId>
+              <version>3.4.0</version>
+              <executions>
+                <execution>
+                  <id>add-generated-sources</id>
+                  <phase>generate-sources</phase>
+                  <goals>
+                    <goal>add-source</goal>
+                  </goals>
+                  <configuration>
+                    <sources>
+                      <source>${project.build.directory}/generated-sources/openapi</source>
+                    </sources>
+                  </configuration>
                 </execution>
               </executions>
             </plugin>
